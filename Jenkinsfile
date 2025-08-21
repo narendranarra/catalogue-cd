@@ -2,22 +2,22 @@ pipeline {
     agent  {
         label 'AGENT-1'
     }
-    environment { 
+    environment {
         appVersion = ''
         REGION = "us-east-1"
-        ACC_ID = "595712054525"
+        ACC_ID = "632745187858"
         PROJECT = "roboshop"
         COMPONENT = "catalogue"
     }
     options {
-        timeout(time: 30, unit: 'MINUTES') 
+        timeout(time: 30, unit: 'MINUTES')
         disableConcurrentBuilds()
     }
     parameters {
         string(name: 'appVersion', description: 'Image version of the application')
-        choice(name: 'deploy_to', choices: ['dev', 'qa', 'prod'], description: 'Pick the Environment')
+        choice(name: 'deploy_to', choices: ['dev', 'qa', 'prod'], description: 'pick the Environment')
     }
-    // Build
+    // Build stages
     stages {
         stage('Deploy') {
             steps {
@@ -34,7 +34,6 @@ pipeline {
                 }
             }
         }
-
         stage('Check Status'){
             steps{
                 script{
@@ -45,7 +44,6 @@ pipeline {
                         } else {
                             sh """
                                 helm rollback $COMPONENT -n $PROJECT
-                                sleep 20
                             """
                             def rollbackStatus = sh(returnStdout: true, script: "kubectl rollout status deployment/catalogue --timeout=30s -n $PROJECT || echo FAILED").trim()
                             if (rollbackStatus.contains("successfully rolled out")) {
@@ -55,22 +53,20 @@ pipeline {
                                 error "Deployment is Failure, Rollback Failure. Application is not running"
                             }
                         }
-
                     }
                 }
             }
         }
     }
-
-    post { 
-        always { 
+    post {
+        always {
             echo 'I will always say Hello again!'
             deleteDir()
         }
-        success { 
+        success {
             echo 'Hello Success'
         }
-        failure { 
+        failure {
             echo 'Hello Failure'
         }
     }
