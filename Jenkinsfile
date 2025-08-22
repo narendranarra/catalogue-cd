@@ -34,7 +34,7 @@ pipeline {
                 }
             }
         }
-        stage('Check Status'){
+        stage('Check Status'){  // This need to be commented till 60 if status is failing, need to refer deployment.yaml file and uncomment 
             steps{
                 script{
                     withAWS(credentials: 'aws-creds', region: 'us-east-1') {
